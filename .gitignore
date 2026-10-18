@@ -1,0 +1,39 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.backup
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local lab exports and large captures
+*.pcap
+*.pcapng
+*.vmdk
+*.qcow2
+
+# Python cache (if scripts are added later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
