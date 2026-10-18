@@ -92,6 +92,4 @@ Academic year: 2025–2026
 
 ## Authors
 
-- Med Aziz Salem
-- Laith Sahli
-- Farouk Bessouda
+- aziz salem
