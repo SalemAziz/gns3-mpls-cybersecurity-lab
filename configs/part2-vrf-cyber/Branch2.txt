@@ -1,0 +1,22 @@
+! Part 2 - Branch2 (CE22) - inter-VLAN routing (router-on-a-stick) + DHCP
+hostname Branch2
+interface FastEthernet0/0.203
+ encapsulation dot1Q 203 native
+ ip address 172.16.203.1 255.255.255.0
+interface FastEthernet0/0.204
+ encapsulation dot1Q 204
+ ip address 172.16.204.1 255.255.255.0
+interface FastEthernet1/0
+ ip address 192.168.1.14 255.255.255.252
+ no shutdown
+!
+ip dhcp excluded-address 172.16.204.1 172.16.204.10
+ip dhcp pool VLAN204
+ network 172.16.204.0 255.255.255.0
+ default-router 172.16.204.1
+!
+router ospf 300
+ network 192.168.1.12 0.0.0.3 area 22
+ network 172.16.203.0 0.0.0.255 area 22
+ network 172.16.204.0 0.0.0.255 area 22
+ network 172.16.22.22 0.0.0.0 area 22

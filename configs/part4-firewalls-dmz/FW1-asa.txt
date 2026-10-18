@@ -1,0 +1,41 @@
+! Part 4 - FW1 (Cisco ASA 5505, Active) - failover, OSPF, ACLs, IPS, AAA
+! NOTE: lab keys only.
+failover
+failover lan unit primary
+failover lan interface FAILOVER Ethernet0/3
+failover key VPN_CYBER_HA
+failover interface ip FAILOVER 10.0.0.1 255.255.255.252 standby 10.0.0.2
+failover link STATE Ethernet0/3
+failover interface ip STATE 10.0.0.5 255.255.255.252 standby 10.0.0.6
+!
+router ospf 300
+ network 192.168.1.28 0.0.0.3 area 11
+ network 172.16.255.0 0.0.0.127 area 11
+ redistribute connected subnets
+!
+! Inside -> DMZ services for all LANs
+access-list INSIDE_IN extended permit tcp 172.16.0.0 0.0.255.255 172.16.255.0 0.0.0.127 eq 80
+access-list INSIDE_IN extended permit tcp 172.16.0.0 0.0.255.255 172.16.255.0 0.0.0.127 eq 443
+access-list INSIDE_IN extended permit tcp 172.16.0.0 0.0.255.255 172.16.255.0 0.0.0.127 eq 25
+access-list INSIDE_IN extended permit udp 172.16.0.0 0.0.255.255 172.16.255.0 0.0.0.127 eq 53
+! Block Siege <-> Branch traffic
+access-list INSIDE_IN extended deny ip 172.16.210.0 0.0.0.255 172.16.202.0 0.0.0.255
+access-list INSIDE_IN extended deny ip 172.16.210.0 0.0.0.255 172.16.204.0 0.0.0.255
+! Full admin access to the DMZ
+access-list INSIDE_IN extended permit ip host 172.16.220.100 172.16.255.0 0.0.0.127
+access-list INSIDE_IN extended permit ip host 172.16.220.150 172.16.255.0 0.0.0.127
+access-group INSIDE_IN in interface inside
+!
+! IPS
+ip audit name IPS_POLICY attack action alarm drop reset
+interface Ethernet0/1
+ ip audit IPS_POLICY in
+interface Ethernet0/2
+ ip audit IPS_POLICY in
+!
+! AAA
+aaa-server RADIUS_SERVER protocol radius
+aaa-server RADIUS_SERVER (inside) host 172.16.220.200
+ key VPN_Cyber
+aaa authentication ssh console RADIUS_SERVER LOCAL
+aaa authentication telnet console RADIUS_SERVER LOCAL

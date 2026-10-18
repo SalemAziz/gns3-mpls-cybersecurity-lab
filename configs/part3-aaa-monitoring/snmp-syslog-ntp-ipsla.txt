@@ -1,0 +1,34 @@
+! Part 3 - SNMPv3 traps to Zabbix, centralised logging, NTP, IP SLA
+! NOTE: lab credentials only.
+snmp-server community SSIR RO
+snmp-server group TEKUP v3 auth
+snmp-server group MYGROUP v3 auth
+snmp-server trap-source Loopback0
+snmp-server enable traps snmp linkdown linkup
+snmp-server enable traps ospf cisco-specific state-change nssa-trans-change
+snmp-server enable traps config
+snmp-server enable traps SLA
+snmp-server host 172.16.220.250 version 3 auth TEKUP
+snmp-server user TEKUP MYGROUP v3 auth md5 SSIR
+!
+logging on
+logging 172.16.220.250
+logging source-interface loopback 0
+logging trap warning
+!
+ntp server 172.16.220.250
+!
+! IP SLA on Branches (CE12, CE22)
+ip sla 11
+ udp-jitter 192.168.1.2 5000
+ frequency 300
+ precision milliseconds
+ip sla 21
+ udp-jitter 192.168.1.6 5000
+ frequency 300
+ precision milliseconds
+ip sla schedule 11 start-time now life forever
+ip sla schedule 21 start-time now life forever
+!
+! On Siege1 and Siege2
+ip sla responder

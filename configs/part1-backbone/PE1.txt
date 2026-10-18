@@ -1,0 +1,40 @@
+! Part 1 - PE1 (Cisco c7200) - OSPF, MPLS/LDP, VRF, MP-BGP
+! Extracted from the technical report (Chapter I)
+ip cef
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 10.1.1.0 0.0.0.3 area 0
+ network 10.1.1.4 0.0.0.3 area 0
+ network 1.1.1.1 0.0.0.0 area 0
+!
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
+interface FastEthernet1/0
+ mpls ip
+interface FastEthernet2/0
+ mpls ip
+!
+ip vrf VPN_Customer1
+ rd 100:1
+ route-target both 100:1
+ip vrf VPN_Customer2
+ rd 100:2
+ route-target both 100:2
+!
+interface FastEthernet3/0
+ ip vrf forwarding VPN_Customer1
+ ip address 192.168.1.1 255.255.255.252
+ no shutdown
+!
+router bgp 100
+ no bgp default ipv4-unicast
+ neighbor 2.2.2.2 remote-as 100
+ neighbor 2.2.2.2 update-source Loopback0
+ address-family vpnv4 unicast
+  neighbor 2.2.2.2 activate
+  neighbor 2.2.2.2 send-community both
+ exit-address-family
+ address-family ipv4 vrf VPN_Customer1
+  redistribute ospf 300 vrf VPN_Customer1
+ exit-address-family

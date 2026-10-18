@@ -1,0 +1,22 @@
+! Part 3 - AAA / RADIUS on every CE and switch
+! NOTE: the shared key below is a LAB value from the GNS3 simulation. Never reuse it in production.
+aaa new-model
+aaa authentication login default group radius local
+aaa authorization exec default group radius local
+aaa accounting exec default start-stop group radius
+!
+radius-server host 172.16.220.200 auth-port 1812 acct-port 1813
+radius-server key VPN_Cyber
+!
+username <admin_user> privilege 15 secret <secret>
+enable secret <secret>
+!
+! Example: management ACL on Siege1 (CE11 - Loopback 172.16.11.11)
+ip access-list extended ACL_MGMT_VTY
+ permit tcp host 172.16.220.100 host 172.16.11.11
+ permit tcp host 172.16.220.150 host 172.16.11.11
+ deny ip any any log
+!
+line vty 0 4
+ access-class ACL_MGMT_VTY in
+ login authentication default

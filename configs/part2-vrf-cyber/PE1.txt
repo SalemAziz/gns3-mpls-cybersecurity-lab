@@ -1,0 +1,24 @@
+! Part 2 - PE1: single VRF VPN_CYBER replaces VPN_Customer1/2
+ip vrf VPN_CYBER
+ rd 100:3
+ route-target both 100:3
+!
+interface FastEthernet3/0
+ ip vrf forwarding VPN_CYBER
+ ip address 192.168.1.1 255.255.255.252
+ no shutdown
+interface FastEthernet4/0
+ ip vrf forwarding VPN_CYBER
+ ip address 192.168.1.5 255.255.255.252
+ no shutdown
+!
+router ospf 300 vrf VPN_CYBER
+ router-id 1.1.1.1
+ redistribute bgp 100 subnets
+ network 192.168.1.0 0.0.0.3 area 11
+ network 192.168.1.4 0.0.0.3 area 11
+!
+router bgp 100
+ address-family ipv4 vrf VPN_CYBER
+  redistribute ospf 300 vrf VPN_CYBER
+ exit-address-family

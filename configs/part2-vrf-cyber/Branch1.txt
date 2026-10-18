@@ -1,0 +1,26 @@
+! Part 2 - Branch1 (CE12) - inter-VLAN routing (router-on-a-stick) + DHCP
+hostname Branch1
+interface FastEthernet0/0
+ no ip address
+ duplex full
+ no shutdown
+interface FastEthernet0/0.201
+ encapsulation dot1Q 201 native
+ ip address 172.16.201.1 255.255.255.0
+interface FastEthernet0/0.202
+ encapsulation dot1Q 202
+ ip address 172.16.202.1 255.255.255.0
+interface FastEthernet1/0
+ ip address 192.168.1.10 255.255.255.252
+ no shutdown
+!
+ip dhcp excluded-address 172.16.202.1 172.16.202.10
+ip dhcp pool VLAN202
+ network 172.16.202.0 255.255.255.0
+ default-router 172.16.202.1
+!
+router ospf 300
+ network 192.168.1.8 0.0.0.3 area 12
+ network 172.16.201.0 0.0.0.255 area 12
+ network 172.16.202.0 0.0.0.255 area 12
+ network 172.16.12.12 0.0.0.0 area 12
